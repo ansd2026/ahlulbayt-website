@@ -1057,6 +1057,72 @@
 </footer>
 
 <script>
+  async function loadPrayerTimes() {
+  const date = new Date();
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  // Columbus, OH coordinates | Method 2 = Islamic Society of North America (ISNA)
+  const url = `https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=39.9612&longitude=-82.9988&method=0`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const t = data.data.timings;
+
+    // Map API keys to your prayer item elements
+    const prayers = [
+      { name: 'Fajr',    time: t.Fajr },
+      { name: 'Sunrise', time: t.Sunrise },
+      { name: 'Dhuhr',   time: t.Dhuhr },
+      { name: 'Asr',     time: t.Asr },
+      { name: 'Maghrib', time: t.Maghrib },
+      { name: 'Isha',    time: t.Isha },
+    ];
+
+    // Update each prayer-item in the banner
+    const items = document.querySelectorAll('.prayer-item');
+    items.forEach((item, i) => {
+      if (prayers[i]) {
+        item.querySelector('.prayer-time').textContent = formatTime(prayers[i].time);
+      }
+    });
+
+    // Highlight the current/next prayer
+    highlightCurrentPrayer(prayers);
+
+  } catch (err) {
+    console.error('Could not load prayer times:', err);
+  }
+}
+
+// Convert "13:32" → "1:32 PM"
+function formatTime(time24) {
+  const [h, m] = time24.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+// Highlight whichever prayer is active/next
+function highlightCurrentPrayer(prayers) {
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
+  const items = document.querySelectorAll('.prayer-item');
+  items.forEach(el => el.classList.remove('active'));
+
+  let activeIndex = 0;
+  prayers.forEach((p, i) => {
+    const [h, m] = p.time.split(':').map(Number);
+    if (nowMins >= h * 60 + m) activeIndex = i;
+  });
+
+  if (items[activeIndex]) items[activeIndex].classList.add('active');
+}
+
+loadPrayerTimes();
   // Fade-in on scroll
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(el => {
