@@ -1111,9 +1111,18 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-  // Mobile menu toggle
+  // ── MOBILE MENU ──
   function toggleMenu(btn) {
     const links = document.querySelector('.nav-links');
     links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
     links.style.flexDirection = 'column';
-    links
+    links.style.position = 'fixed';
+    links.style.top = '72px';
+    links.style.left = '0'; links.style.right = '0';
+    links.style.background = 'rgba(14,44,26,0.98)';
+    links.style.padding = '20px 5%';
+    links.style.gap = '20px';
+  }
+</script>
+</body>
+</html>
